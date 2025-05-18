@@ -86,19 +86,33 @@ async def upload_video(file: UploadFile = File(...)):
         print("UPLOAD ERROR:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/seed")
+async def seed_torrent(file: UploadFile = File(...)):
+    # Save the uploaded .torrent file to a temp directory
+    temp_dir = tempfile.mkdtemp()
+    torrent_path = os.path.join(temp_dir, file.filename)
+    with open(torrent_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Start a new TorrentSession with the .torrent file
+    session_id = str(time.time())
+    save_path = temp_dir
+    active_sessions[session_id] = TorrentSession(torrent_path, save_path)
+
+    return {"session_id": session_id}
+
 @app.get("/stream/{session_id}")
 async def stream_video(session_id: str):
     if session_id not in active_sessions:
         raise HTTPException(status_code=404, detail="Session not found")
     
     session = active_sessions[session_id]
-    status = session.handle.status()
-    
-    if status.progress < 0.1:  # Wait for initial buffer
-        return {"status": "buffering", "progress": status.progress * 100}
-    
-    # Stream the video file
-    video_path = session.torrent_info.files().file_path(0)
+    video_rel_path = session.torrent_info.files().file_path(0)
+    video_path = os.path.join(session.handle.save_path() if hasattr(session.handle, 'save_path') else getattr(session, 'save_path', '.'), video_rel_path)
+    print(f"[STREAM] Looking for video file at: {video_path}")
+    if not os.path.exists(video_path):
+        print("[STREAM] File not found!")
+        raise HTTPException(status_code=404, detail="Video file not found")
     return FileResponse(
         video_path,
         media_type="video/mp4",
