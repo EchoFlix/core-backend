@@ -2,21 +2,15 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [main]  # or your deployment branch
+    branches: [main]
 
 jobs:
-  Deploy-to-EC2:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    # (Optional) Build step if you want to build assets before upload
-    # - name: Build
-    #   run: |
-    #     cd core-backend
-    #     # e.g., npm run build or other build steps
 
     - name: Copy files to EC2 via SCP
       uses: appleboy/scp-action@v0.1.7
@@ -24,7 +18,7 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER || 'ubuntu' }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "."
+        source: "core-backend/"
         target: "/home/ubuntu/echoflix-backend"
 
     - name: SSH into EC2 and deploy
@@ -35,9 +29,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd /home/ubuntu/echoflix-backend
-          python3 -m venv venv || true
-          source venv/bin/activate
+          source venv/bin/activate || python3 -m venv venv && source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-          pkill -f uvicorn || true
-          nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sudo systemctl restart echoflix-backend
