@@ -5,7 +5,7 @@ on:
     branches: [main]  # or your deployment branch
 
 jobs:
-  deploy:
+  Deploy-to-EC2:
     runs-on: ubuntu-latest
 
     steps:
