@@ -18,7 +18,9 @@ origins = [
     "http://localhost:3000",  # Common React development port
     "http://127.0.0.1:3000",
     "https://d26nd2yb6rqlvi.cloudfront.net",
-    "http://d26nd2yb6rqlvi.cloudfront.net",  # Alternative localhost
+    "http://d26nd2yb6rqlvi.cloudfront.net",
+    "http://echoflix-s3.s3-website-us-east-1.amazonaws.com",
+    "https://echoflix-s3.s3-website-us-east-1.amazonaws.com",  # Alternative localhost
 ]
 
 app.add_middleware(
