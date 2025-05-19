@@ -16,7 +16,9 @@ origins = [
     "http://localhost:5173",  # Vite's default development server
     "http://127.0.0.1:5173",  # Alternative localhost
     "http://localhost:3000",  # Common React development port
-    "http://127.0.0.1:3000",  # Alternative localhost
+    "http://127.0.0.1:3000",
+    "https://d26nd2yb6rqlvi.cloudfront.net",
+    "http://d26nd2yb6rqlvi.cloudfront.net",  # Alternative localhost
 ]
 
 app.add_middleware(
